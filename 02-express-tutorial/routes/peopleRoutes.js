@@ -7,7 +7,7 @@ const {
     personByID,
     updatePersonByID,
     deletePersonByID,
-} = require("../controllers/people");
+} = require("../controllers/peopleController");
 
 router.route("/")
     .get(getPeople)

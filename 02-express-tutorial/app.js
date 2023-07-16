@@ -3,9 +3,10 @@ console.log('Express Tutorial')
 const express = require('express');
 const path = require('path');
 const { products } = require('./data');
-const { people } = require('./data');
 const app = express();
-const peopleRouter = require('./routes/people');
+const peopleRouter = require('./routes/peopleRoutes');
+const authRouter = require('./routes/authRoutes');
+const cookieParser = require('cookie-parser');
 
 const logger = (req, res, next) => {
     const method = req.method;
@@ -20,11 +21,14 @@ const logger = (req, res, next) => {
     console.log(method, url, time)
     next();
 };
-app.use(logger);
-app.use(express.static(path.join(__dirname, './methods-public')));
+
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+app.use(logger);
+app.use(express.static(path.join(__dirname, './methods-public')));
 app.use('/api/v1/people', peopleRouter);
+app.use(authRouter);
 
 app.get('/', (req, res) => {
     res.sendFile(path.resolve(__dirname, 'public', 'index.html'))
@@ -73,20 +77,6 @@ app.get("/api/v1/query", (req, res) => {
 
     return res.status(200).json(searchProducts)
 });
-
-//people API
-// app.get('/api/v1/people', (req, res) => {
-//     res.json(people)
-// });
-
-// app.post('/api/v1/people', (req, res) => {
-//     const { name } = req.body;
-//     if (!name) {
-//         res.status(400).json({ success: false, message: "Please provide a name" });
-//     }
-//     people.push({ id: people.length, name: req.body.name });
-//     res.status(201).json({ success: true, name: req.body.name });
-// })
 
 app.all('*', (req, res) => {
     res.status(404).send('Page not found')
