@@ -3,10 +3,32 @@ console.log('Express Tutorial')
 const express = require('express');
 const path = require('path');
 const { products } = require('./data');
-
 const app = express();
+const peopleRouter = require('./routes/peopleRoutes');
+const authRouter = require('./routes/authRoutes');
+const cookieParser = require('cookie-parser');
 
-app.use(express.static(path.join(__dirname, 'public')));
+const logger = (req, res, next) => {
+    const method = req.method;
+    const url = req.url;
+
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const day = date.getDate();
+    const time = `${day}/${month}/${year}`;
+
+    console.log(method, url, time)
+    next();
+};
+
+app.use(cookieParser());
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
+app.use(logger);
+app.use(express.static(path.join(__dirname, './methods-public')));
+app.use('/api/v1/people', peopleRouter);
+app.use(authRouter);
 
 app.get('/', (req, res) => {
     res.sendFile(path.resolve(__dirname, 'public', 'index.html'))
@@ -16,6 +38,7 @@ app.get('/api/v1/test', (req, res) => {
     res.json({message: 'It worked!'})
 });
 
+//products API
 app.get('/api/v1/products', (req, res) => {
     res.json(products)
 });
